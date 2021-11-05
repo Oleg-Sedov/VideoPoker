@@ -82,7 +82,25 @@ def count_win():  # расчитываем выйгрыш
     return win
 
 
+payout_table = (f'''Таблица выплат:
+                  {combinations[0]} х {payout_rates[0]}
+                  {combinations[1]} х {payout_rates[1]}
+                  {combinations[2]} x {payout_rates[2]}
+                  {combinations[3]} x {payout_rates[3]}
+                  {combinations[4]} x {payout_rates[4]}
+                  {combinations[5]} x {payout_rates[5]}
+                  {combinations[6]} x {payout_rates[6]}
+                  {combinations[7]} x {payout_rates[7]}
+                  {combinations[8]} x {payout_rates[8]}
+                  ''')
+
+print(f'''Добро пожаловать в игру "Видео покер". Задача игрока собрать как можно более сильную покерную комбинацию:
+        Чтобы выйграть необходимо собрать комбинацию от пары валетов или старше ("Jacks or better").
+        {payout_table}''')
 while points > 0 and exit_request != 'y' and exit_request != 'у':
+    print(f'''Добро пожаловать в игру "Видео покер". Задача игрока собрать как можно более сильную покерную комбинацию:
+            Чтобы выйграть необходимо собрать комбинацию от пары валетов или старше ("Jacks or better").
+            {payout_table}''')
     print('У Вас', points, 'очков!')
     print('Введите ставку:')
     bet = int(input())
