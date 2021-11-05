@@ -17,3 +17,12 @@ points = 1000
 bet = 0
 combination = ''
 exit_request = ''
+
+
+def flush_check():  # функция проверки на флэш
+    global combination
+    for i in suites:
+        if i == suites[4]:
+            combination = combinations[4]
+        else:
+            break
