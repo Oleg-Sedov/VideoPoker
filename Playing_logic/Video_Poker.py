@@ -20,65 +20,56 @@ combination = ''
 exit_request = ''
 
 
-def flush_check():  # функция проверки на флэш
-    global combination
-    counter = 0
-    for suite in suites:
+def straight_flush_check(comb):  # функция проверки на флэш/стрит
+    counter_flush = 0
+    for suite in suites:  # проверка есть ли флэш
         if suite == suites[4]:
-            counter += 1
-    if counter == 5:
-        combination = combinations[4]
+            counter_flush += 1
+    counter_straight = 0
 
-
-def straight_check():
-    global combination
-    combination_2 = ''
-    counter = 0
-    for rank in range(4):
-        if ranks[rank + 1] - 1 == ranks[rank]:  # check in visualizer
-            counter += 1
-    if counter == 4:
-        combination_2 = combinations[3]
-    if combination == combinations[4] and combination_2 == combinations[3]:
-        combination = combinations[7]
+    for rank in range(4):  # проверка есть ли стрит
+        if ranks[rank + 1] - 1 == ranks[rank]:
+            counter_straight += 1
+    if counter_flush == 5 and counter_straight == 4:
+        comb = combinations[7]
         if max(ranks) == 14:
-            combination = combinations[8]
-    else:
-        combination = combination_2
+            comb = combinations[8]
+    elif counter_flush == 5:
+        comb = combinations[4]
+    elif counter_straight == 4:
+        comb = combinations[3]
+
+    return comb
 
 
-def pairs_3ofkind_4ofkind_fullhouse_check():  # проверка пары/две пары, сет, каре, фуллхаус
-    global combination
-    if combination in [combinations[3], combinations[4], combinations[7], combinations[8]]:
-        return
-    else:
-        counter = 0
-        used_cards = []
-        for rank in range(4):  # сравниваем ранг первых 4 карт со следующей картой 1с2, 2с3 ...
-            if ranks[rank] == ranks[rank + 1]:
-                counter += 1  # считаем кол-во совпадений, совпадаение одно - одна пара. два-2 пары/cет. три-каре/фулл
-                used_cards.append(rank)  # записываем индексы карты которая совпадает со следующей
+def pairs_3ofkind_4ofkind_fullhouse_check(comb):  # проверка пары/две пары, сет, каре, фуллхаус
+    counter = 0
+    used_cards = []
+    for rank in range(4):  # сравниваем ранг первых 4 карт со следующей картой 1с2, 2с3 ...
+        if ranks[rank] == ranks[rank + 1]:
+            counter += 1  # считаем кол-во совпадений, совпадаение одно - одна пара. два-2 пары/cет. три-каре/фулл
+            used_cards.append(rank)  # записываем индексы карты которая совпадает со следующей
         # если совпадают последовательные индексы, то это сет либо карэ (в зависимости от счетчика совпадений)
         # если разность индексов > 1, то это две пары либо фуллхаус (в той же зависимости)
-        if counter == 0:
-            combination = 'High card'
-        if counter == 1:
-            if ranks[used_cards[0]] >= 11:
-                combination = combinations[0]
-            else:
-                combination = 'Pair'
-        if counter == 2 and used_cards[1] - used_cards[0] != 1:
-            combination = combinations[1]
-        elif counter == 2 and used_cards[1] - used_cards[0] == 1:
-            combination = combinations[2]
-        if counter == 3 and (used_cards[2] - used_cards[1] != 1 or used_cards[1] - used_cards[0] != 1):
-            combination = combinations[5]
-        elif counter == 3:
-            combination = combinations[6]
+    if counter == 0:
+        comb = 'High card'
+    if counter == 1:
+        if ranks[used_cards[0]] >= 11:
+            comb = combinations[0]
+        else:
+            comb = 'Pair'
+    if counter == 2 and used_cards[1] - used_cards[0] != 1:
+        comb = combinations[1]
+    elif counter == 2 and used_cards[1] - used_cards[0] == 1:
+        comb = combinations[2]
+    if counter == 3 and (used_cards[2] - used_cards[1] != 1 or used_cards[1] - used_cards[0] != 1):
+        comb = combinations[5]
+    elif counter == 3:
+        comb = combinations[6]
+    return comb
 
 
 def count_win():  # расчитываем выйгрыш
-    global combination, bet, payout_rates
     if combination not in combinations:
         win = 0
     else:
@@ -148,14 +139,14 @@ while points > 0 and exit_request != 'y' and exit_request != 'у':
 
     for i in to_change:  # замена выбранных карт
         player_cards[i - 1] = cards.pop(1)
-        
+
     suites = [i[1] for i in player_cards]  # получаем масти карт
     nominal = [i[0] for i in player_cards]  # получаем номиналы карт (как видит игрок)
     ranks = sorted([ranks_dict.get(i[0]) for i in player_cards])  # ранг карт + сортировка для проверки стрита
 
-    flush_check()  # порядок вызова функций критичен. flush_check() должен запускаться перед Straight_check()
-    straight_check()
-    pairs_3ofkind_4ofkind_fullhouse_check()
+    combination = straight_flush_check(combination)
+    if combination == '':
+        combination = pairs_3ofkind_4ofkind_fullhouse_check(combination)
 
     print(f'Ваша комбинация {combination}!')
     print('Начальные карты\n', *player_cards_prev)
