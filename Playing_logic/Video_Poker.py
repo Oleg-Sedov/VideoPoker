@@ -1,15 +1,11 @@
 # This is the try up of skills
 # ♠︎ ♣︎ ♥︎ ♦︎
-
+import poker_functions
 import random
-# Создаем колоду карт
-cards_deck = ['A♠', 'A♣', 'A♥', 'A♦', 'K♠', 'K♣', 'K♥', 'K♦', 'Q♠', 'Q♣', 'Q♥', 'Q♦', 'J♠', 'J♣', 'J♥', 'J♦',
-              'T♠', 'T♣', 'T♥', 'T♦', '9♠', '9♣', '9♥', '9♦', '8♠', '8♣', '8♥', '8♦', '7♠', '7♣', '7♥', '7♦',
-              '6♠', '6♣', '6♥', '6♦', '5♠', '5♣', '5♥', '5♦', '4♠', '4♣', '4♥', '4♦', '3♠', '3♣', '3♥', '3♦',
-              '2♠', '2♣', '2♥', '2♦']
-combinations = ['Pair of Jacks of better', 'Two pairs', 'Three of a kind', 'Straight', 'Flush', 'Full House',
-                'Four of a kind', 'Straight Flush', 'Royal Flush']
-payout_rates = [2, 4, 7, 14, 28, 50, 340, 3500, 25000]  # множители выйгрыша
+
+combinations = ('Pair of Jacks of better', 'Two pairs', 'Three of a kind', 'Straight', 'Flush', 'Full House',
+                'Four of a kind', 'Straight Flush', 'Royal Flush')
+payout_rates = (2, 4, 7, 14, 28, 50, 340, 3500, 25000)  # множители выйгрыша
 # Словари ранга карт (карта:ранг, ранг:карта)
 ranks_dict = {'A': 14, 'a': 1, 'K': 13, 'Q': 12, 'J': 11, 'T': 10, '9': 9,
               '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2}
@@ -19,66 +15,7 @@ points = 1000
 combination = ''
 exit_request = ''
 
-
-def flush_check():  # функция проверки на флэш
-    global combination
-    counter = 0
-    for suite in suites:
-        if suite == suites[4]:
-            counter += 1
-    if counter == 5:
-        combination = combinations[4]
-
-
-def straight_check():
-    global combination
-    combination_2 = ''
-    counter = 0
-    for rank in range(4):
-        if ranks[rank + 1] - 1 == ranks[rank]:  # check in visualizer
-            counter += 1
-    if counter == 4:
-        combination_2 = combinations[3]
-    if combination == combinations[4] and combination_2 == combinations[3]:
-        combination = combinations[7]
-        if max(ranks) == 14:
-            combination = combinations[8]
-    else:
-        combination = combination_2
-
-
-def pairs_3ofkind_4ofkind_fullhouse_check():  # проверка пары/две пары, сет, каре, фуллхаус
-    global combination
-    if combination in [combinations[3], combinations[4], combinations[7], combinations[8]]:
-        return
-    else:
-        counter = 0
-        used_cards = []
-        for rank in range(4):  # сравниваем ранг первых 4 карт со следующей картой 1с2, 2с3 ...
-            if ranks[rank] == ranks[rank + 1]:
-                counter += 1  # считаем кол-во совпадений, совпадаение одно - одна пара. два-2 пары/cет. три-каре/фулл
-                used_cards.append(rank)  # записываем индексы карты которая совпадает со следующей
-        # если совпадают последовательные индексы, то это сет либо карэ (в зависимости от счетчика совпадений)
-        # если разность индексов > 1, то это две пары либо фуллхаус (в той же зависимости)
-        if counter == 0:
-            combination = 'High card'
-        if counter == 1:
-            if ranks[used_cards[0]] >= 11:
-                combination = combinations[0]
-            else:
-                combination = 'Pair'
-        if counter == 2 and used_cards[1] - used_cards[0] != 1:
-            combination = combinations[1]
-        elif counter == 2 and used_cards[1] - used_cards[0] == 1:
-            combination = combinations[2]
-        if counter == 3 and (used_cards[2] - used_cards[1] != 1 or used_cards[1] - used_cards[0] != 1):
-            combination = combinations[5]
-        elif counter == 3:
-            combination = combinations[6]
-
-
 def count_win():  # расчитываем выйгрыш
-    global combination, bet, payout_rates
     if combination not in combinations:
         win = 0
     else:
@@ -97,6 +34,7 @@ payout_table = (f'''Таблица выплат:
         {combinations[7]}{(len(combinations[0]) - len(combinations[7])) * ' '} x {payout_rates[7]}
         {combinations[8]}{(len(combinations[0]) - len(combinations[8])) * ' '} x {payout_rates[8]}''')
 
+
 print(f'''Добро пожаловать в игру "Видео покер". Задача игрока собрать как можно более сильную покерную комбинацию:
 Чтобы выйграть необходимо собрать комбинацию от пары валетов или старше ("Jacks or better").
 {payout_table}
@@ -110,9 +48,9 @@ print(f'''Добро пожаловать в игру "Видео покер". �
 print('У Вас', points, 'очков!')
 
 while points > 0 and exit_request != 'y' and exit_request != 'у':
-    to_change_flag = False  # сбрасываем флаг проверки корректности выбранных к замене карт
+    to_change_flag = False
     print('Введите ставку:')
-    bet = input()  # ставка игрока
+    bet = input()
     try:  # проверка ставки игрока на корректность данных
         bet = int(bet)
     except ValueError:
@@ -120,42 +58,41 @@ while points > 0 and exit_request != 'y' and exit_request != 'у':
         continue
 
     points -= bet
-    cards = cards_deck.copy()  # загружаем карты в игровую колоду. Имитация возврата карт в колоду после раунда
-    random.shuffle(cards)  # Тасуем карты
+    card_deck = list(poker_functions.cards_deck_generate())
+    random.shuffle(card_deck)  # Тасуем карты
 
-    player_cards = [cards.pop(0) for _ in range(5)]  # Выдаем 5 карт игроку, удаляя выданное из игровой колоды
+    player_cards = [card_deck.pop(0) for _ in range(5)]  # Выдаем 5 карт игроку, удаляя выданное из игровой колоды
     print(*player_cards)  # Показываем карты игроку
-    player_cards_prev = player_cards.copy()
+    player_cards_prev = player_cards.copy()  # сохраняем первоначальные карты
 
-    print('Выберите карты для замены. Введите порядковые номера карт без пробелов для замены (от 1 до 5)')
+    print('Выберите карты для замены. Введите порядковые номера карт без пробелов для замены (от 1 до 5)'
+          'Номера карт не должны повторяться')
 
     while to_change_flag is False:  # проверяем корректность данных для замены карт
-        to_change = list(input())  # создание списка к замене
+        to_change = list(input())
         count = 0
         for changed in to_change:
             if changed.isdigit() is False:
-                continue
+                break
             else:
                 if int(changed) > 5:
-                    continue
+                    break
                 else:
                     count += 1
-        if count == len(to_change):
+        if count == len(to_change) and len(to_change) == len(set(to_change)):
             to_change_flag = True
+
         else:
-            print('Для выбора карт используйте целые числа от 1 до 5\nВыберите карты для замены. ')
+            print('Для выбора карт используйте целые числа от 1 до 5. Номера карт не должны повторяться!'
+                  '\nВыберите карты для замены.')
     to_change = [int(to_change[i]) for i in range(len(to_change))]
 
     for i in to_change:  # замена выбранных карт
-        player_cards[i - 1] = cards.pop(1)
-        
-    suites = [i[1] for i in player_cards]  # получаем масти карт
-    nominal = [i[0] for i in player_cards]  # получаем номиналы карт (как видит игрок)
-    ranks = sorted([ranks_dict.get(i[0]) for i in player_cards])  # ранг карт + сортировка для проверки стрита
+        player_cards[i - 1] = card_deck.pop(1)
 
-    flush_check()  # порядок вызова функций критичен. flush_check() должен запускаться перед Straight_check()
-    straight_check()
-    pairs_3ofkind_4ofkind_fullhouse_check()
+    combination = poker_functions.straight_flush_check(player_cards)
+    if combination == '':
+        combination = poker_functions.pairs_3ofkind_4ofkind_fullhouse_check(player_cards)
 
     print(f'Ваша комбинация {combination}!')
     print('Начальные карты\n', *player_cards_prev)
