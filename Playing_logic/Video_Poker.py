@@ -6,14 +6,11 @@ import random
 combinations = ('Pair of Jacks of better', 'Two pairs', 'Three of a kind', 'Straight', 'Flush', 'Full House',
                 'Four of a kind', 'Straight Flush', 'Royal Flush')
 payout_rates = (2, 4, 7, 14, 28, 50, 340, 3500, 25000)  # множители выйгрыша
-# Словари ранга карт (карта:ранг, ранг:карта)
-ranks_dict = {'A': 14, 'a': 1, 'K': 13, 'Q': 12, 'J': 11, 'T': 10, '9': 9,
-              '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2}
-reversed_ranks_dict = {14: 'A', 1: 'a', 13: 'K', 12: 'Q', 11: 'J', 10: 'T', 9: '9', 8: '8',
-                       7: '7', 6: '6', 5: '5', 4: '4', 3: '3', 2: '2'}
+
 points = 1000
 combination = ''
 exit_request = ''
+
 
 def count_win():  # расчитываем выйгрыш
     if combination not in combinations:
@@ -69,7 +66,7 @@ while points > 0 and exit_request != 'y' and exit_request != 'у':
           'Номера карт не должны повторяться')
 
     while to_change_flag is False:  # проверяем корректность данных для замены карт
-        to_change = list(input())
+        to_change = list(set(input()))  # удаление случайных повторно дважды выбранных карт ("113" -> "13")
         count = 0
         for changed in to_change:
             if changed.isdigit() is False:
@@ -79,7 +76,7 @@ while points > 0 and exit_request != 'y' and exit_request != 'у':
                     break
                 else:
                     count += 1
-        if count == len(to_change) and len(to_change) == len(set(to_change)):
+        if count == len(to_change):
             to_change_flag = True
 
         else:
@@ -89,7 +86,6 @@ while points > 0 and exit_request != 'y' and exit_request != 'у':
 
     for i in to_change:  # замена выбранных карт
         player_cards[i - 1] = card_deck.pop(1)
-
     combination = poker_functions.straight_flush_check(player_cards)
     if combination == '':
         combination = poker_functions.pairs_3ofkind_4ofkind_fullhouse_check(player_cards)
@@ -103,7 +99,7 @@ while points > 0 and exit_request != 'y' and exit_request != 'у':
     else:
         print('К сожалению, Вы проиграли.')
     print(f'У Вас {points} очков!')
-    if points == 0:  # Какой смысл предлагать продолжать Играть если все проебано :(
+    if points == 0:  # Какой смысл предлагать продолжать играть если все проиграно :(
         break
     print('Если хотите продожить нажмите Enter. Для выхода введите "y"')
     exit_request = input()
