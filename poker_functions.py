@@ -1,5 +1,5 @@
-# This function is intended to determine the most power hand you can make with the pocket card_deck and common card_deck.
-# h_cards parameter must contain strictly 2 elements list, c_cards may contain 3, 4 or 5 elements list
+"""This file determines combinations a player has."""
+
 import itertools
 
 ranks_dict = {'A': 14, 'a': 1, 'K': 13, 'Q': 12, 'J': 11, 'T': 10, '9': 9,
@@ -34,6 +34,15 @@ def straight_flush_check(player_cards):
     for rank in range(4):  # проверка есть ли стрит
         if ranks[rank + 1] - 1 == ranks[rank]:
             counter_straight += 1
+    if counter_straight != 4:
+        counter_straight = 0
+        ranks_dict['A'] = 1  # установка "веса" туза за единицу
+        ranks = sorted([ranks_dict.get(i[0]) for i in player_cards])
+        for rank in range(4):
+            if ranks[rank + 1] - 1 == ranks[rank]:
+                counter_straight += 1
+        ranks_dict['A'] = 14  # после рассчетов и проверки на низший стрит возвращаем "вес" туза
+
     if counter_flush == 5 and counter_straight == 4:
         comb = combinations[7]
         if max(ranks) == 14:
