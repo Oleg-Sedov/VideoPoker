@@ -29,7 +29,7 @@ def straight_flush_check(player_cards):
     for suite in suites:  # проверка есть ли флэш
         if suite == suites[4]:
             counter_flush += 1
-    # TODO не учитывается стрит от А до 5 - исправить
+    
     counter_straight = 0
     for rank in range(4):  # проверка есть ли стрит
         if ranks[rank + 1] - 1 == ranks[rank]:
