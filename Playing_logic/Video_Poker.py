@@ -12,6 +12,7 @@ combination = ''
 exit_request = ''
 
 
+#  перенести функцию к функциям
 def count_win():  # расчитываем выйгрыш
     if combination not in combinations:
         win = 0
@@ -20,22 +21,16 @@ def count_win():  # расчитываем выйгрыш
     return win
 
 
-payout_table = (f'''Таблица выплат:
-        {combinations[0]} х {payout_rates[0]}
-        {combinations[1]}{(len(combinations[0]) - len(combinations[1])) * ' '} х {payout_rates[1]}
-        {combinations[2]}{(len(combinations[0]) - len(combinations[2])) * ' '} x {payout_rates[2]}
-        {combinations[3]}{(len(combinations[0]) - len(combinations[3])) * ' '} x {payout_rates[3]}
-        {combinations[4]}{(len(combinations[0]) - len(combinations[4])) * ' '} x {payout_rates[4]}
-        {combinations[5]}{(len(combinations[0]) - len(combinations[5])) * ' '} x {payout_rates[5]}
-        {combinations[6]}{(len(combinations[0]) - len(combinations[6])) * ' '} x {payout_rates[6]}
-        {combinations[7]}{(len(combinations[0]) - len(combinations[7])) * ' '} x {payout_rates[7]}
-        {combinations[8]}{(len(combinations[0]) - len(combinations[8])) * ' '} x {payout_rates[8]}''')
+def payout_table():
+    for i, _ in enumerate(combinations):
+        print(f'{combinations[i].ljust(len(combinations[0]))} x {payout_rates[i]}')
 
 
 print(f'''Добро пожаловать в игру "Видео покер". Задача игрока собрать как можно более сильную покерную комбинацию:
 Чтобы выйграть необходимо собрать комбинацию от пары валетов или старше ("Jacks or better").
-{payout_table}
-Для замены карт используйте числа от 1 до 5 без пробелов, где число соответствует позиции карты слева направо.
+Таблица выплат:''')
+payout_table()
+print('''Для замены карт используйте числа от 1 до 5 без пробелов, где число соответствует позиции карты слева направо.
 Например:
 Вам раздали A♣ K♥ T♣ T♥ 9♠
 Чтобы заменить A♣ K♥ 9♠ необходимо ввести 125
@@ -45,13 +40,15 @@ print(f'''Добро пожаловать в игру "Видео покер". �
 print('У Вас', points, 'очков!')
 
 while points > 0 and exit_request != 'y' and exit_request != 'у':
-    to_change_flag = False
     print('Введите ставку:')
     bet = input()
     try:  # проверка ставки игрока на корректность данных
         bet = int(bet)
+        if bet > points:
+            raise ValueError
     except ValueError:
-        print('Некорректная ставка. Введите действиетльное (целое) число ( > 0)')
+        print(f'Некорректная ставка. Введите действиетльное (целое) число ( > 0), не превышающее'
+              f'доступное количество очков - {points}''')
         continue
 
     points -= bet
@@ -64,7 +61,7 @@ while points > 0 and exit_request != 'y' and exit_request != 'у':
 
     print('Выберите карты для замены. Введите порядковые номера карт без пробелов для замены (от 1 до 5)'
           'Номера карт не должны повторяться')
-
+    to_change_flag = False
     while to_change_flag is False:  # проверяем корректность данных для замены карт
         to_change = list(set(input()))  # удаление случайных повторно дважды выбранных карт ("113" -> "13")
         count = 0
@@ -86,13 +83,12 @@ while points > 0 and exit_request != 'y' and exit_request != 'у':
 
     for i in to_change:  # замена выбранных карт
         player_cards[i - 1] = card_deck.pop(1)
-    combination = poker_functions.straight_flush_check(player_cards)
-    if combination == '':
-        combination = poker_functions.pairs_3ofkind_4ofkind_fullhouse_check(player_cards)
+
+    combination = poker_functions.combination_check(player_cards)
 
     print(f'Ваша комбинация {combination}!')
-    print('Начальные карты\n', *player_cards_prev)
-    print('Ваши текущие карты\n', *player_cards)
+    print('Начальные карты\n', ' '.join(player_cards_prev))
+    print('Ваши текущие карты\n', ' '.join(player_cards).upper())
     points += count_win()
     if combination in combinations:
         print(f'Чистый выйгрыш {count_win() - bet} очков!')
