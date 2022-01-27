@@ -56,50 +56,42 @@ while points > 0 and (exit_request != 'y' or exit_request != 'у'):
 
     player_cards = [card_deck.pop(0) for _ in range(5)]  # Выдаем 5 карт игроку, удаляя выданное из игровой колоды
     print(*player_cards)  # Показываем карты игроку
-    player_cards_prev = player_cards.copy()  # сохраняем первоначальные карты
 
-    print('Выберите карты для замены. Введите порядковые номера карт без пробелов для замены (от 1 до 5)'
+    print('Выберите карты для замены. Введите порядковые номера карт без пробелов для замены (от 1 до 5) '
           'Номера карт не должны повторяться')
-    to_change_flag = False
-    while to_change_flag is False:  # проверяем корректность данных для замены карт
-        to_change = list(set(input()))  # удаление случайных повторно дважды выбранных карт ("113" -> "13")
-        count = 0
-        for changed in to_change:
-            if changed.isdigit() is False:
-                break
-            else:
-                if int(changed) > 5:
-                    break
-                else:
-                    count += 1
-        if count == len(to_change):
-            to_change_flag = True
-
-        else:
+    while True:
+        try:
+            to_change = [int(v) for _, v in enumerate(list(set(input())))]
+            for value in to_change:
+                if value not in range(1, 6):
+                    raise ValueError
+        except ValueError:
             print('Для выбора карт используйте целые числа от 1 до 5. Номера карт не должны повторяться!'
                   '\nВыберите карты для замены.')
-    to_change = [int(to_change[i]) for i in range(len(to_change))]
+            continue
+        else:
+            break
 
-    for i in to_change:  # замена выбранных карт
-        player_cards[i - 1] = card_deck.pop(1)
+    for index in to_change:  # замена выбранных карт
+        player_cards[index - 1] = card_deck.pop(0)
 
     combination = poker_functions.combination_check(player_cards)
 
     print(f'Ваша комбинация {combination}!')
-    print('Начальные карты\n', ' '.join(player_cards_prev))
-    print('Ваши текущие карты\n', ' '.join(player_cards).upper())
+    print('Ваши карты\n', ' '.join(player_cards).upper())
     points += count_win()
     if combination in combinations:
-        print(f'Чистый выйгрыш {count_win() - bet} очков!')
+        print(f'Выйгрыш {count_win()} очков!')
     else:
         print('К сожалению, Вы проиграли.')
     print(f'У Вас {points} очков!')
     if points == 0:  # Какой смысл предлагать продолжать играть если все проиграно :(
         break
     print('Если хотите продожить нажмите Enter. Для выхода введите "y"')
+
     exit_request = input()
+
 if points == 0:
     print('Вы все проиграли, барин')
 else:
     print(f'Поздравляем Ваш баланс {points} очков.\nСпасибо за игру')
-   
