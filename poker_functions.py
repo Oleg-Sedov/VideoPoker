@@ -76,16 +76,3 @@ def combination_check(player_cards):
             comb = combinations[8]
     return comb
 
-
-
-
-def hand_determiner(h_cards, c_cards):
-    """Receives pocket card of a player and common card_deck as arguments. Finds all possible variations of hands with
-    this card_deck."""
-
-    combs = []
-    cards = h_cards + c_cards
-    for c in itertools.combinations(cards, 5):
-        combs.append(list(c))
-    # return combs
-    pass
